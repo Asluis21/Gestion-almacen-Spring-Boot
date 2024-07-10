@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -38,6 +39,26 @@ public class ProductoController {
         try{
             response.put("message", "Productos listados correctamente");
             response.put("productos", productoService.listarProductos());
+            return ResponseEntity.ok(response);
+
+        }catch(Exception e){
+            
+            response.put("message", "No se pudo listar productos");
+            response.put("exception", e.getMessage());
+            
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+    }
+    
+    @GetMapping("/listar/{descripcion}")
+    public ResponseEntity<?> listarProductosByDescripcion(@PathVariable String descripcion){
+
+
+        Map<String, Object> response = new HashMap<>();
+
+        try{
+            response.put("message", "Productos encontrados correctamente");
+            response.put("productos", productoService.listarProductosByDescripcion(descripcion));
             return ResponseEntity.ok(response);
 
         }catch(Exception e){
@@ -120,6 +141,35 @@ public class ProductoController {
         }catch(Exception e){
             
             response.put("message", "No se pudieron crear los productos");
+            response.put("exception", e.getMessage());
+            
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+    }
+    
+    @PutMapping("/editar/{id}")
+    public ResponseEntity<?> editarProducto(@PathVariable Long id, @Valid @RequestBody ProductoDTO producto, BindingResult result){
+
+        Map<String, Object> response = new HashMap<>();
+
+        try{
+
+            if(result.hasErrors()){
+
+                result.getFieldErrors().forEach(error -> {
+                    response.put(error.getField(), error.getDefaultMessage());
+                });
+
+                return new ResponseEntity<>(response, HttpStatus.UNPROCESSABLE_ENTITY);
+            }
+
+            response.put("message", "Producto editado correctamente");
+            response.put("productos", productoService.editarProducto(id, producto));
+            return ResponseEntity.ok(response);
+
+        }catch(Exception e){
+            
+            response.put("message", "No se pudieron editar los productos");
             response.put("exception", e.getMessage());
             
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);

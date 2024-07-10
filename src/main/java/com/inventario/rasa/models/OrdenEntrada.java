@@ -2,6 +2,7 @@ package com.inventario.rasa.models;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import org.hibernate.validator.constraints.Length;
 
@@ -43,6 +44,8 @@ public class OrdenEntrada {
 
     @NotNull
     @OneToMany
-    private List<Producto> productos;
+    private List<ProductoEntrada> productos;
 
+    // @NotNull
+    // private Set<OrdenEntradaProducto> ordenEntradaProducto; 
 }

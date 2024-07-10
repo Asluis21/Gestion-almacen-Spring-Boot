@@ -2,14 +2,18 @@ package com.inventario.rasa.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.inventario.rasa.models.Categoria;
 import com.inventario.rasa.models.Producto;
+import com.inventario.rasa.models.ProductoEntrada;
 import com.inventario.rasa.models.dto.ProductoDTO;
 import com.inventario.rasa.models.dto.ProductoRetiroDTO;
+import com.inventario.rasa.repository.IProductoEntradaRepository;
 import com.inventario.rasa.repository.IProductoRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -19,18 +23,45 @@ import lombok.RequiredArgsConstructor;
 public class ProductoService {
     
     private final IProductoRepository productoRepository;
+    private final IProductoEntradaRepository productoEntradaRepository;
+    private final CategoriaService categoriaService;
 
     //CREAR VARIOS PRODUCTOS
     @Transactional
-    public List<Producto> crearProductos(List<ProductoDTO> productosDTO){
-        List<Producto> productos = new ArrayList<>();
+    public List<ProductoEntrada> crearProductos(List<ProductoDTO> productosDTO){
+        
+        List<ProductoEntrada> productos = new ArrayList<>();
         
         productosDTO.forEach(p -> {
-            Producto nuevoProducto = new Producto();
+
+            Optional<Producto> productoOptional = productoRepository.findByDescripcionAndSerieAndAlmacen(p.getDescripcion(), p.getSerie(), p.getAlmacen());
+
+            if(productoOptional.isPresent()){
+                Producto productoEncontrado = productoOptional.get();
+                productoEncontrado.setCantidad(productoEncontrado.getCantidad() + p.getCantidad());
+                productoEncontrado.setUbicacion(p.getUbicacion());
+                productoEncontrado.setEstadoProducto(p.getEstadoProducto());
+
+            }else{
+                Producto nuevoProducto = new Producto();
+                nuevoProducto.setDescripcion(p.getDescripcion());
+                nuevoProducto.setAlmacen(p.getAlmacen());
+                nuevoProducto.setCantidad(p.getCantidad());
+                nuevoProducto.setCategoria(p.getCategoria());
+                nuevoProducto.setEstado(true);
+                nuevoProducto.setEstadoProducto(p.getEstadoProducto());
+                nuevoProducto.setPeso(p.getPeso());
+                nuevoProducto.setSerie(p.getSerie());
+                nuevoProducto.setUbicacion(p.getUbicacion());
+
+
+                productoRepository.save(nuevoProducto);
+            }
+            
+            ProductoEntrada nuevoProducto = new ProductoEntrada();
             nuevoProducto.setDescripcion(p.getDescripcion());
             nuevoProducto.setAlmacen(p.getAlmacen());
             nuevoProducto.setCantidad(p.getCantidad());
-            nuevoProducto.setCantidadEntrada(p.getCantidad());
             nuevoProducto.setCategoria(p.getCategoria());
             nuevoProducto.setEstado(true);
             nuevoProducto.setEstadoProducto(p.getEstadoProducto());
@@ -39,14 +70,21 @@ public class ProductoService {
             nuevoProducto.setUbicacion(p.getUbicacion());
 
             productos.add(nuevoProducto);
+
+
         });
 
-        return productoRepository.saveAll(productos);
+        return productoEntradaRepository.saveAll(productos);
     }
 
     @Transactional(readOnly= true)
     public List<Producto> listarProductos(){
         return productoRepository.findAll();
+    }
+    
+    @Transactional(readOnly= true)
+    public List<Producto> listarProductosByDescripcion(String descripcion){
+        return productoRepository.findByDescripcionStartsWith(descripcion);
     }
     
     @Transactional(readOnly= true)
@@ -79,7 +117,10 @@ public class ProductoService {
 
         productoEncontrado.setAlmacen(producto.getAlmacen());
         productoEncontrado.setCantidad(producto.getCantidad());
-        productoEncontrado.setCategoria(producto.getCategoria());
+
+        Categoria categoriaEncontrada = categoriaService.encontrarCategoriaById(producto.getCategoria().getId());
+        productoEncontrado.setCategoria(categoriaEncontrada);
+
         productoEncontrado.setDescripcion(producto.getDescripcion());
         productoEncontrado.setEstadoProducto(producto.getEstadoProducto());
         productoEncontrado.setPeso(producto.getPeso());

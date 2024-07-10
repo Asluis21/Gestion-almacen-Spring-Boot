@@ -34,7 +34,7 @@ public class OrdenEntradaService {
             orden.setId(o.getId());
             orden.setFechaEntrada(o.getFechaEntrada().toString().substring(0, 10));
             orden.setObservacion(o.getObservacion());
-            // orden.setProductos(o.getProductos());
+            orden.setProductos(o.getProductos());
             orden.setProveedor(o.getProveedor());
             orden.setPuntoLlegada(o.getPuntoLlegada());
             orden.setUsuario(UsuarioDTO.usuarioAusuarioDto(o.getUsuario()));

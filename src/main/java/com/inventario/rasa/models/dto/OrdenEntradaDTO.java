@@ -6,6 +6,7 @@ import org.hibernate.validator.constraints.Length;
 
 import com.inventario.rasa.auth.UsuarioDTO;
 import com.inventario.rasa.models.Producto;
+import com.inventario.rasa.models.ProductoEntrada;
 import com.inventario.rasa.models.Proveedor;
 
 import jakarta.validation.constraints.NotNull;
@@ -30,7 +31,8 @@ public class OrdenEntradaDTO {
     @NotNull
     private UsuarioDTO usuario;
 
+    
     @NotNull
-    private List<Producto> productos;
+    private List<ProductoEntrada> productos;
 
 }
